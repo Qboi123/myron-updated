@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.ModelProviderException;
 import net.fabricmc.fabric.api.client.model.ModelResourceProvider;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.render.model.UnbakedModel;
 import net.minecraft.resource.ResourceManager;
@@ -21,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Environment(EnvType.CLIENT)
 @Mixin(value = ModelLoader.class, priority = 100)
 public abstract class MixinModelLoader {
-    @Shadow @Final private ResourceManager resourceManager;
+    //@Shadow @Final private ResourceManager resourceManager;
 
     @Shadow protected abstract void putModel(Identifier id, UnbakedModel unbakedModel);
 
@@ -29,8 +30,9 @@ public abstract class MixinModelLoader {
 
     @Inject(method = "loadModel", at = @At("HEAD"), cancellable = true)
     private void addObjModel(Identifier id, CallbackInfo ci) {
+        ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
         if (this.objModelProvider == null) {
-            this.objModelProvider = new ObjLoader(this.resourceManager);
+            this.objModelProvider = new ObjLoader(resourceManager);
         }
 
         try {
